@@ -522,3 +522,42 @@ tweenTeleport(originalPosition)
 
    end,
 })
+
+local player = game:GetService("Players").LocalPlayer
+local zombiesFolder = workspace:FindFirstChild("Zombies") -- Change if needed
+local loop = false -- Controls whether the loop is running
+
+local function teleportZombies()
+    if not zombiesFolder then return end
+
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+    local root = character.HumanoidRootPart
+    local frontOffset = root.CFrame.LookVector * 5 -- Distance in front of the player
+
+    for _, zombie in pairs(zombiesFolder:GetChildren()) do
+        if zombie:IsA("Model") and zombie:FindFirstChild("HumanoidRootPart") then
+            local zombieRoot = zombie.HumanoidRootPart
+            zombieRoot.CFrame = CFrame.new(root.Position + frontOffset, root.Position) -- Face the player
+        end
+    end
+end
+
+local Toggle = Tab:CreateToggle({
+    Name = "Teleport Zombies",
+    CurrentValue = false,
+    Flag = "Toggle1",
+    Callback = function(Value)
+        loop = Value -- Set loop state based on toggle
+
+        if loop then
+            task.spawn(function()
+                while loop do
+                    teleportZombies()
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end,
+})
