@@ -1,0 +1,426 @@
+    local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+    
+    local Window = Rayfield:CreateWindow({
+       Name = "KorrupRetard",
+       Icon = 0,
+       LoadingTitle = "KorrupRetard",
+       LoadingSubtitle = "by RnD",
+       Theme = "Default",
+    
+       DisableRayfieldPrompts = false,
+       DisableBuildWarnings = false,
+    
+       ConfigurationSaving = {
+          Enabled = true,
+          FolderName = "KorrupRetard",
+          FileName = "KorrupRetard Hub"
+       },
+    
+       Discord = {
+          Enabled = false,
+          Invite = "noinvitelink",
+          RememberJoins = true
+       },
+    
+       KeySystem = false,
+       KeySettings = {
+          Title = "Untitled",
+          Subtitle = "Key System",
+          Note = "No method of obtaining the key is provided",
+          FileName = "Key",
+          SaveKey = true,
+          GrabKeyFromSite = false,
+          Key = {"Hello"}
+       }
+    })
+    
+    local MainTab = Window:CreateTab("👁️Esp", nil)
+    local MainSection = MainTab:CreateSection("Main")
+    
+    Rayfield:Notify({
+       Title = "Executed",
+       Content = "KorrupRetard",
+       Duration = 3,
+       Image = 4483362458,
+    })
+    
+    -- ESP Toggle System
+    local espEnabled = false
+    local runService = game:GetService("RunService")
+    local zombiesFolder = game.Workspace:FindFirstChild("Zombies")
+    local heartbeatConnection
+    
+    local function highlightZombies()
+        if not zombiesFolder then return end
+    
+        for _, zombie in pairs(zombiesFolder:GetChildren()) do
+            if zombie:IsA("Model") and zombie.PrimaryPart then
+                if espEnabled then
+                    -- Create Highlight if it doesn't exist
+                    if not zombie:FindFirstChild("Highlight") then
+                        local highlight = Instance.new("Highlight")
+                        highlight.Adornee = zombie
+                        highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red highlight
+                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- White outline
+                        highlight.Parent = zombie
+                    end
+    
+                    -- Create BillboardGui if it doesn't exist
+                    if not zombie:FindFirstChild("BillboardGui") then
+                        local billboard = Instance.new("BillboardGui")
+                        billboard.Size = UDim2.new(4, 0, 1, 0)
+                        billboard.StudsOffset = Vector3.new(0, 3, 0) -- Adjust height above the head
+                        billboard.Adornee = zombie.PrimaryPart
+                        billboard.Parent = zombie
+                        billboard.AlwaysOnTop = true
+    
+                        -- Create the TextLabel
+                        local textLabel = Instance.new("TextLabel")
+                        textLabel.Size = UDim2.new(1, 0, 1, 0)
+                        textLabel.BackgroundTransparency = 1
+                        textLabel.Text = "Retard Zombie"
+                        textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                        textLabel.TextStrokeTransparency = 0
+                        textLabel.Font = Enum.Font.SourceSansBold
+                        textLabel.TextScaled = true
+                        textLabel.Parent = billboard
+                    end
+                else
+                    -- Remove Highlight if ESP is disabled
+                    local highlight = zombie:FindFirstChild("Highlight")
+                    if highlight then
+                        highlight:Destroy()
+                    end
+    
+                    -- Remove BillboardGui if ESP is disabled
+                    local billboard = zombie:FindFirstChild("BillboardGui")
+                    if billboard then
+                        billboard:Destroy()
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Toggle ESP function
+    local function toggleESP()
+        espEnabled = not espEnabled
+    
+        if espEnabled then
+            highlightZombies()
+            heartbeatConnection = runService.Heartbeat:Connect(highlightZombies) -- Run ESP check continuously
+            Rayfield:Notify({
+                Title = "ESP Enabled",
+                Content = "ESP is now active!",
+                Duration = 3,
+                Image = 4483362458
+            })
+        else
+            if heartbeatConnection then
+                heartbeatConnection:Disconnect() -- Stop the loop
+                heartbeatConnection = nil
+            end
+    
+            highlightZombies() -- This will remove existing ESP elements
+            Rayfield:Notify({
+                Title = "ESP Disabled",
+                Content = "ESP has been turned off",
+                Duration = 3,
+                Image = 4483362458
+            })
+        end
+    end
+    
+    -- ESP Button
+    local Button = MainTab:CreateButton({
+       Name = "Toggle ESP",
+       Callback = function()
+          toggleESP()
+       end
+    })
+
+
+
+    local Tab = Window:CreateTab("🏃‍♂️Movement", nil) -- Title, Image
+    
+    local Section = Tab:CreateSection("Movement")
+    
+    local flySpeed = 700
+    local flying = false
+    local runService = game:GetService("RunService")
+    local userInput = game:GetService("UserInputService")
+    local players = game:GetService("Players")
+    local localPlayer = players.LocalPlayer
+    local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    
+    local alignPosition, alignOrientation
+    local attachment
+    
+    local function isTyping()
+        return userInput:GetFocusedTextBox() ~= nil
+    end
+    
+    local function toggleFly()
+        flying = not flying
+    
+        if flying then
+            -- Create attachment
+            attachment = Instance.new("Attachment", rootPart)
+    
+            -- Create AlignPosition for smooth movement
+            alignPosition = Instance.new("AlignPosition")
+            alignPosition.Attachment0 = attachment
+            alignPosition.Mode = Enum.PositionAlignmentMode.OneAttachment
+            alignPosition.MaxForce = math.huge
+            alignPosition.Responsiveness = 15
+            alignPosition.RigidityEnabled = false
+            alignPosition.Parent = rootPart
+    
+            -- Create AlignOrientation for rotation stability
+            alignOrientation = Instance.new("AlignOrientation")
+            alignOrientation.Attachment0 = attachment
+            alignOrientation.Mode = Enum.OrientationAlignmentMode.OneAttachment
+            alignOrientation.MaxTorque = math.huge
+            alignOrientation.Responsiveness = 15
+            alignOrientation.Parent = rootPart
+    
+            -- Fly movement update
+            local connection
+            connection = runService.RenderStepped:Connect(function()
+                if not flying then
+                    connection:Disconnect()
+                    if alignPosition then alignPosition:Destroy() end
+                    if alignOrientation then alignOrientation:Destroy() end
+                    if attachment then attachment:Destroy() end
+                    return
+                end
+    
+                if isTyping() then
+                    alignPosition.Position = rootPart.Position
+                    return
+                end
+    
+                local camera = workspace.CurrentCamera
+                local moveDirection = Vector3.zero
+    
+                if userInput:IsKeyDown(Enum.KeyCode.W) then
+                    moveDirection = moveDirection + camera.CFrame.LookVector
+                end
+                if userInput:IsKeyDown(Enum.KeyCode.S) then
+                    moveDirection = moveDirection - camera.CFrame.LookVector
+                end
+                if userInput:IsKeyDown(Enum.KeyCode.A) then
+                    moveDirection = moveDirection - camera.CFrame.RightVector
+                end
+                if userInput:IsKeyDown(Enum.KeyCode.D) then
+                    moveDirection = moveDirection + camera.CFrame.RightVector
+                end
+                if userInput:IsKeyDown(Enum.KeyCode.E) then
+                    moveDirection = moveDirection + Vector3.new(0, 1, 0) -- Fly up
+                end
+                if userInput:IsKeyDown(Enum.KeyCode.Q) then
+                    moveDirection = moveDirection - Vector3.new(0, 1, 0) -- Fly down
+                end
+    
+                if moveDirection.Magnitude > 0 then
+                    alignPosition.Position = rootPart.Position + moveDirection.Unit * flySpeed * 0.05
+                else
+                    alignPosition.Position = rootPart.Position
+                end
+    
+                alignOrientation.CFrame = CFrame.new(rootPart.Position, rootPart.Position + camera.CFrame.LookVector)
+            end)
+        else
+            if alignPosition then alignPosition:Destroy() end
+            if alignOrientation then alignOrientation:Destroy() end
+            if attachment then attachment:Destroy() end
+        end
+    end
+    
+    local Button = Tab:CreateButton({
+       Name = "Toggle Fly",
+       Callback = function()
+          toggleFly()
+       end
+    })
+    
+    
+    local RunService = game:GetService("RunService")
+    
+    local playerModel = game.Workspace.Players:FindFirstChild("iHxshVxoid")
+    if not playerModel then
+        warn("Player model 'iHxshVxoid' not found in Workspace.Players!")
+        return
+    end
+    
+    local humanoid = playerModel:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+        warn("Humanoid not found in 'iHxshVxoid'!")
+        return
+    end
+    
+    local noclipEnabled = false
+    local heartbeatConnection
+    
+    local function setCollisions(model, state)
+        for _, obj in pairs(model:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                obj.CanCollide = state
+            end
+        end
+    end
+    
+    local function preventFalling()
+        if noclipEnabled and humanoid then
+            humanoid:SetAttribute("isFalling", false) 
+            humanoid:ChangeState(Enum.HumanoidStateType.Physics) 
+        end
+    end
+    
+    local function onHeartbeat()
+        if noclipEnabled then
+            setCollisions(playerModel, false)
+            preventFalling()
+        end
+    end
+    
+    local function toggleNoclip()
+        noclipEnabled = not noclipEnabled
+    
+        if noclipEnabled then
+            setCollisions(playerModel, false) -- Disable collisions
+            heartbeatConnection = RunService.Heartbeat:Connect(onHeartbeat)
+            print("Noclip Enabled")
+        else
+            if heartbeatConnection then
+                heartbeatConnection:Disconnect()
+                heartbeatConnection = nil
+            end
+            setCollisions(playerModel, true) -- Re-enable collisions
+            if humanoid then
+                humanoid:SetAttribute("isFalling", true)
+                humanoid:ChangeState(Enum.HumanoidStateType.Freefall) -- Allow falling again
+            end
+            print("Noclip Disabled")
+        end
+    end
+    
+    local Button = Tab:CreateButton({
+       Name = "Toggle Noclip",
+       Callback = function()
+          toggleNoclip()
+       end
+    })
+    
+    
+    local Workspace = game:GetService("Workspace")
+    local Camera = Workspace.CurrentCamera
+    local RunService = game:GetService("RunService")
+    local UserInputService = game:GetService("UserInputService")
+    local TweenService = game:GetService("TweenService")
+    
+    local Holding = false
+    local AimbotEnabled = false
+    local RenderSteppedConnection = nil
+    
+    _G.Sensitivity = 0
+    _G.CircleSides = 104
+    _G.CircleColor = Color3.fromRGB(255, 255, 255)
+    _G.CircleTransparency = 0.7
+    _G.CircleRadius = 450
+    _G.CircleFilled = false
+    _G.CircleVisible = true
+    _G.CircleThickness = 0
+    
+    local FOVCircle = Drawing.new("Circle")
+    FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    FOVCircle.Radius = _G.CircleRadius
+    FOVCircle.Filled = _G.CircleFilled
+    FOVCircle.Color = _G.CircleColor
+    FOVCircle.Visible = false -- Start with it hidden
+    FOVCircle.Transparency = _G.CircleTransparency
+    FOVCircle.NumSides = _G.CircleSides
+    FOVCircle.Thickness = _G.CircleThickness
+    
+    local function GetClosestZombie()
+        local MaximumDistance = _G.CircleRadius
+        local Target = nil
+    
+        for _, zombie in pairs(Workspace.Zombies:GetChildren()) do
+            if zombie:FindFirstChild("Head") and zombie:FindFirstChild("Humanoid") and zombie.Humanoid.Health > 0 then
+                local ScreenPoint = Camera:WorldToScreenPoint(zombie.Head.Position)
+                local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+    
+                if VectorDistance < MaximumDistance then
+                    Target = zombie
+                    MaximumDistance = VectorDistance
+                end
+            end
+        end
+    
+        return Target
+    end
+    
+    local function ToggleAimbot()
+        AimbotEnabled = not AimbotEnabled
+    
+        if AimbotEnabled then
+            print("Aimbot Enabled")
+    
+            local function OnInputBegan(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                    Holding = true
+                end
+            end
+    
+            local function OnInputEnded(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                    Holding = false
+                end
+            end
+    
+            UserInputService.InputBegan:Connect(OnInputBegan)
+            UserInputService.InputEnded:Connect(OnInputEnded)
+    
+            -- Start aimbot logic
+            RenderSteppedConnection = RunService.RenderStepped:Connect(function()
+                FOVCircle.Position = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+                FOVCircle.Visible = true -- Show the circle when aimbot is enabled
+    
+                if Holding then
+                    local Target = GetClosestZombie()
+                    if Target then
+                        TweenService:Create(
+                            Camera, 
+                            TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), 
+                            {CFrame = CFrame.new(Camera.CFrame.Position, Target.Head.Position)}
+                        ):Play()
+                    end
+                end
+            end)
+        else
+        
+            print("Aimbot Disabled")
+    
+            -- Disconnect the RenderStepped event to stop aimbot behavior
+            if RenderSteppedConnection then
+                RenderSteppedConnection:Disconnect()
+                RenderSteppedConnection = nil
+            end
+    
+            -- Hide the FOV circle when disabled
+            FOVCircle.Visible = false
+        end
+    end
+    
+    local Tab = Window:CreateTab("🎯Aimbot", nil) -- Title, Image
+    local Section = Tab:CreateSection("Aimbot")
+    
+    local Button = Tab:CreateButton({
+        Name = "Toggle Aimbot",
+        Callback = function()
+            ToggleAimbot()
+        end
+    })
