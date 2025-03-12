@@ -329,7 +329,7 @@
     _G.CircleSides = 104
     _G.CircleColor = Color3.fromRGB(255, 255, 255)
     _G.CircleTransparency = 0.7
-    _G.CircleRadius = 450
+    _G.CircleRadius = 650
     _G.CircleFilled = false
     _G.CircleVisible = true
     _G.CircleThickness = 0
@@ -424,3 +424,101 @@
             ToggleAimbot()
         end
     })
+
+
+local Tab = Window:CreateTab("🌍World", nil) -- Title, Image
+local Section = Tab:CreateSection("World")
+
+local Button = Tab:CreateButton({
+   Name = "FullBright",
+   Callback = function()
+local Lighting = game:GetService("Lighting")
+
+local function enableFullbright()
+    Lighting.Brightness = 5
+    Lighting.GlobalShadows = false
+    Lighting.Ambient = Color3.new(1, 1, 1) -- Full white ambient
+    Lighting.OutdoorAmbient = Color3.new(1, 1, 1) -- Makes outdoor areas bright too
+end
+
+enableFullbright()
+
+-- Optional: Reapply settings if Lighting changes
+Lighting.Changed:Connect(enableFullbright)
+
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "NoFog",
+   Callback = function()
+local Lighting = game:GetService("Lighting")
+
+local function removeFog()
+    -- Disable Fog
+    Lighting.FogStart = 0
+    Lighting.FogEnd = 100000 -- Large number to remove fog
+
+    -- Remove Atmosphere
+    for _, v in pairs(Lighting:GetChildren()) do
+        if v:IsA("Atmosphere") or v:IsA("PostEffect") then
+            v:Destroy()
+        end
+    end
+end
+
+removeFog()
+
+-- Keep checking in case fog is re-added
+Lighting.ChildAdded:Connect(function(child)
+    if child:IsA("Atmosphere") or child:IsA("PostEffect") then
+        child:Destroy()
+    end
+end)
+
+Lighting.Changed:Connect(removeFog)
+
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "BuyAmmo",
+   Callback = function()
+local tween_s = game:GetService("TweenService")
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local lp = game.Players.LocalPlayer
+local character = lp.Character or lp.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local teleportLocation = workspace:WaitForChild("MapFolder"):WaitForChild("Ammo Boxes"):WaitForChild("Default"):WaitForChild("Origin")
+local remoteEvent = replicatedStorage:WaitForChild("Remotes"):WaitForChild("RemoteEvent")
+
+local tweeninfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear) -- Fast teleport time
+
+function tweenTeleport(destination)
+    local cf = CFrame.new(destination)
+    local tween = tween_s:Create(humanoidRootPart, tweeninfo, {CFrame = cf})
+    tween:Play()
+    tween.Completed:Wait() -- Wait for teleport to finish
+end
+
+-- Save the player's original position
+local originalPosition = humanoidRootPart.Position
+
+-- Tween teleport to ammo box
+tweenTeleport(teleportLocation.Position)
+
+-- Fire the remote event
+task.wait(0.1)
+local args = {
+    [1] = "Buy Ammo",
+    [2] = workspace:WaitForChild("MapFolder"):WaitForChild("Ammo Boxes"):WaitForChild("Default")
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RemoteEvent"):FireServer(unpack(args))
+
+-- Tween teleport back to the original position
+tweenTeleport(originalPosition)
+
+   end,
+})
