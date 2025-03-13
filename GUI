@@ -247,72 +247,74 @@
     })
     
     
-    local RunService = game:GetService("RunService")
-    
-    local playerModel = game.Workspace.Players:FindFirstChild("iHxshVxoid")
-    if not playerModel then
-        warn("Player model 'iHxshVxoid' not found in Workspace.Players!")
-        return
-    end
-    
-    local humanoid = playerModel:FindFirstChildOfClass("Humanoid")
-    if not humanoid then
-        warn("Humanoid not found in 'iHxshVxoid'!")
-        return
-    end
-    
-    local noclipEnabled = false
-    local heartbeatConnection
-    
-    local function setCollisions(model, state)
-        for _, obj in pairs(model:GetDescendants()) do
-            if obj:IsA("BasePart") then
-                obj.CanCollide = state
-            end
+local RunService = game:GetService("RunService")
+local players = game:GetService("Players")
+local localPlayer = players.LocalPlayer
+local playerModel = localPlayer.Character
+
+if not playerModel then
+    warn("Player model not found!")
+    return
+end
+
+local humanoid = playerModel:FindFirstChildOfClass("Humanoid")
+if not humanoid then
+    warn("Humanoid not found in player model!")
+    return
+end
+
+local noclipEnabled = false
+local heartbeatConnection
+
+local function setCollisions(model, state)
+    for _, obj in pairs(model:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.CanCollide = state
         end
     end
-    
-    local function preventFalling()
-        if noclipEnabled and humanoid then
-            humanoid:SetAttribute("isFalling", false) 
-            humanoid:ChangeState(Enum.HumanoidStateType.Physics) 
-        end
+end
+
+local function preventFalling()
+    if noclipEnabled and humanoid then
+        humanoid:SetAttribute("isFalling", false) 
+        humanoid:ChangeState(Enum.HumanoidStateType.Physics) 
     end
-    
-    local function onHeartbeat()
-        if noclipEnabled then
-            setCollisions(playerModel, false)
-            preventFalling()
-        end
+end
+
+local function onHeartbeat()
+    if noclipEnabled then
+        setCollisions(playerModel, false)
+        preventFalling()
     end
-    
-    local function toggleNoclip()
-        noclipEnabled = not noclipEnabled
-    
-        if noclipEnabled then
-            setCollisions(playerModel, false) -- Disable collisions
-            heartbeatConnection = RunService.Heartbeat:Connect(onHeartbeat)
-            print("Noclip Enabled")
-        else
-            if heartbeatConnection then
-                heartbeatConnection:Disconnect()
-                heartbeatConnection = nil
-            end
-            setCollisions(playerModel, true) -- Re-enable collisions
-            if humanoid then
-                humanoid:SetAttribute("isFalling", true)
-                humanoid:ChangeState(Enum.HumanoidStateType.Freefall) -- Allow falling again
-            end
-            print("Noclip Disabled")
+end
+
+local function toggleNoclip()
+    noclipEnabled = not noclipEnabled
+
+    if noclipEnabled then
+        setCollisions(playerModel, false) -- Disable collisions
+        heartbeatConnection = RunService.Heartbeat:Connect(onHeartbeat)
+        print("Noclip Enabled")
+    else
+        if heartbeatConnection then
+            heartbeatConnection:Disconnect()
+            heartbeatConnection = nil
         end
+        setCollisions(playerModel, true) -- Re-enable collisions
+        if humanoid then
+            humanoid:SetAttribute("isFalling", true)
+            humanoid:ChangeState(Enum.HumanoidStateType.Freefall) -- Allow falling again
+        end
+        print("Noclip Disabled")
     end
-    
-    local Button = Tab:CreateButton({
-       Name = "Toggle Noclip",
-       Callback = function()
-          toggleNoclip()
-       end
-    })
+end
+
+local Button = Tab:CreateButton({
+   Name = "Toggle Noclip",
+   Callback = function()
+      toggleNoclip()
+   end
+})
     
     
     local Workspace = game:GetService("Workspace")
