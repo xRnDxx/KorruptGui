@@ -129,57 +129,6 @@ ESP_Group:AddButton("No Fog", function()
     Lighting.Changed:Connect(removeFog)
     Library:Notify("No Fog Enabled")
 end)
-ESP_Group:AddButton("White Arms", function()
-    local player = game:GetService("Players").LocalPlayer
-    local camera = workspace:FindFirstChild("Camera")
-
-    if not camera then
-        warn("Camera not found!")
-        return
-    end
-
-    print("Camera found, searching for ViewModel...")
-
-    -- Function to modify ViewModel
-    local function modifyViewModel(viewModel)
-        if viewModel:IsA("Model") and viewModel.Name == "ViewModel" then
-            print("Found ViewModel:", viewModel:GetFullName())
-
-            for _, part in ipairs(viewModel:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    print("Checking part:", part.Name)
-
-                    -- Remove SurfaceAppearance objects
-                    for _, surface in ipairs(part:GetChildren()) do
-                        if surface:IsA("SurfaceAppearance") then
-                            print("Removing SurfaceAppearance from", part.Name)
-                            surface:Destroy()
-                        end
-                    end
-
-                    -- Change material and color
-                    part.Material = Enum.Material.Neon
-                    part.Color = Color3.fromRGB(255, 255, 255)
-                    print("Changed material to Neon and White for", part.Name)
-                end
-            end
-        end
-    end
-
-    -- Modify existing ViewModels
-    for _, child in ipairs(camera:GetChildren()) do
-        modifyViewModel(child)
-    end
-
-    -- Detect new ViewModels added after script runs
-    camera.ChildAdded:Connect(function(child)
-        task.wait(0.5) -- Slight delay to ensure parts are loaded
-        modifyViewModel(child)
-    end)
-
-    print("White Arms functionality applied.")
-    Library:Notify("White Arms Enabled")
-end)
 
 -- Right Group: Movement Controls
 local Movement_Group = Main_Tab:AddRightGroupbox("Movement")
