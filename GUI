@@ -15,7 +15,7 @@ local Window = Library:CreateWindow({
 local Main_Tab = Window:AddTab("Main")
 
 -- Left Group: ESP Controls
-local ESP_Group = Main_Tab:AddLeftGroupbox("ESP Controls")
+local ESP_Group = Main_Tab:AddLeftGroupbox("Visuals")
 
 -- ESP Toggle System
 local espEnabled = false
