@@ -1,270 +1,243 @@
-    local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-    
-    local Window = Rayfield:CreateWindow({
-       Name = "KorrupRetard",
-       Icon = 0,
-       LoadingTitle = "KorrupRetard",
-       LoadingSubtitle = "by RnD",
-       Theme = "Default",
-    
-       DisableRayfieldPrompts = false,
-       DisableBuildWarnings = false,
-    
-       ConfigurationSaving = {
-          Enabled = true,
-          FolderName = "KorrupRetard",
-          FileName = "KorrupRetard Hub"
-       },
-    
-       Discord = {
-          Enabled = false,
-          Invite = "noinvitelink",
-          RememberJoins = true
-       },
-    
-       KeySystem = false,
-       KeySettings = {
-          Title = "Untitled",
-          Subtitle = "Key System",
-          Note = "No method of obtaining the key is provided",
-          FileName = "Key",
-          SaveKey = true,
-          GrabKeyFromSite = false,
-          Key = {"Hello"}
-       }
-    })
-    
-    local MainTab = Window:CreateTab("👁️Esp", nil)
-    local MainSection = MainTab:CreateSection("Main")
-    
-    Rayfield:Notify({
-       Title = "Executed",
-       Content = "KorrupRetard",
-       Duration = 3,
-       Image = 4483362458,
-    })
-    
-    -- ESP Toggle System
-    local espEnabled = false
-    local runService = game:GetService("RunService")
-    local zombiesFolder = game.Workspace:FindFirstChild("Zombies")
-    local heartbeatConnection
-    
-    local function highlightZombies()
-        if not zombiesFolder then return end
-    
-        for _, zombie in pairs(zombiesFolder:GetChildren()) do
-            if zombie:IsA("Model") and zombie.PrimaryPart then
-                if espEnabled then
-                    -- Create Highlight if it doesn't exist
-                    if not zombie:FindFirstChild("Highlight") then
-                        local highlight = Instance.new("Highlight")
-                        highlight.Adornee = zombie
-                        highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red highlight
-                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- White outline
-                        highlight.Parent = zombie
-                    end
-    
-                    -- Create BillboardGui if it doesn't exist
-                    if not zombie:FindFirstChild("BillboardGui") then
-                        local billboard = Instance.new("BillboardGui")
-                        billboard.Size = UDim2.new(4, 0, 1, 0)
-                        billboard.StudsOffset = Vector3.new(0, 3, 0) -- Adjust height above the head
-                        billboard.Adornee = zombie.PrimaryPart
-                        billboard.Parent = zombie
-                        billboard.AlwaysOnTop = true
-    
-                        -- Create the TextLabel
-                        local textLabel = Instance.new("TextLabel")
-                        textLabel.Size = UDim2.new(1, 0, 1, 0)
-                        textLabel.BackgroundTransparency = 1
-                        textLabel.Text = "Retard Zombie"
-                        textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                        textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-                        textLabel.TextStrokeTransparency = 0
-                        textLabel.Font = Enum.Font.SourceSansBold
-                        textLabel.TextScaled = true
-                        textLabel.Parent = billboard
-                    end
-                else
-                    -- Remove Highlight if ESP is disabled
-                    local highlight = zombie:FindFirstChild("Highlight")
-                    if highlight then
-                        highlight:Destroy()
-                    end
-    
-                    -- Remove BillboardGui if ESP is disabled
-                    local billboard = zombie:FindFirstChild("BillboardGui")
-                    if billboard then
-                        billboard:Destroy()
-                    end
+-- Load Linoria UI Library
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/Library.lua"))()
+Library:SetWatermark("xRnDxOnTop")
+
+-- Create UI Window
+local Window = Library:CreateWindow({
+    Title = 'KorruptRetard',
+    Center = true,
+    AutoShow = true,
+    TabPadding = 8,
+    MenuFadeTime = 0.2
+})
+
+-- Main Tab (ESP & Movement)
+local Main_Tab = Window:AddTab("Main")
+
+-- Left Group: ESP Controls
+local ESP_Group = Main_Tab:AddLeftGroupbox("ESP Controls")
+
+-- ESP Toggle System
+local espEnabled = false
+local runService = game:GetService("RunService")
+local zombiesFolder = game.Workspace:FindFirstChild("Zombies")
+local heartbeatConnection
+
+local function highlightZombies()
+    if not zombiesFolder then return end
+
+    for _, zombie in pairs(zombiesFolder:GetChildren()) do
+        if zombie:IsA("Model") and zombie.PrimaryPart then
+            if espEnabled then
+                if not zombie:FindFirstChild("Highlight") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Adornee = zombie
+                    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    highlight.Parent = zombie
+                end
+
+                if not zombie:FindFirstChild("BillboardGui") then
+                    local billboard = Instance.new("BillboardGui")
+                    billboard.Size = UDim2.new(4, 0, 1, 0)
+                    billboard.StudsOffset = Vector3.new(0, 3, 0)
+                    billboard.Adornee = zombie.PrimaryPart
+                    billboard.Parent = zombie
+                    billboard.AlwaysOnTop = true
+
+                    local textLabel = Instance.new("TextLabel")
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.Text = "Retard Zombie"
+                    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                    textLabel.TextStrokeTransparency = 0
+                    textLabel.Font = Enum.Font.SourceSansBold
+                    textLabel.TextScaled = true
+                    textLabel.Parent = billboard
+                end
+            else
+                local highlight = zombie:FindFirstChild("Highlight")
+                if highlight then
+                    highlight:Destroy()
+                end
+
+                local billboard = zombie:FindFirstChild("BillboardGui")
+                if billboard then
+                    billboard:Destroy()
                 end
             end
         end
     end
-    
-    -- Toggle ESP function
-    local function toggleESP()
-        espEnabled = not espEnabled
-    
-        if espEnabled then
-            highlightZombies()
-            heartbeatConnection = runService.Heartbeat:Connect(highlightZombies) -- Run ESP check continuously
-            Rayfield:Notify({
-                Title = "ESP Enabled",
-                Content = "ESP is now active!",
-                Duration = 3,
-                Image = 4483362458
-            })
-        else
-            if heartbeatConnection then
-                heartbeatConnection:Disconnect() -- Stop the loop
-                heartbeatConnection = nil
+end
+
+local function toggleESP()
+    espEnabled = not espEnabled
+
+    if espEnabled then
+        highlightZombies()
+        heartbeatConnection = runService.Heartbeat:Connect(highlightZombies)
+        Library:Notify("ESP Enabled")
+    else
+        if heartbeatConnection then
+            heartbeatConnection:Disconnect()
+            heartbeatConnection = nil
+        end
+        highlightZombies()
+        Library:Notify("ESP Disabled")
+    end
+end
+
+ESP_Group:AddToggle("ESP_Enabled", {
+    Text = "ESP",
+    Default = false,
+    Callback = function(state)
+        toggleESP()
+    end
+})
+
+ESP_Group:AddButton("FullBright", function()
+    local Lighting = game:GetService("Lighting")
+    local function enableFullbright()
+        Lighting.Brightness = 5
+        Lighting.GlobalShadows = false
+        Lighting.Ambient = Color3.new(1, 1, 1)
+        Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+    end
+    enableFullbright()
+    Lighting.Changed:Connect(enableFullbright)
+    Library:Notify("FullBright Enabled")
+end)
+
+ESP_Group:AddButton("No Fog", function()
+    local Lighting = game:GetService("Lighting")
+    local function removeFog()
+        Lighting.FogStart = 0
+        Lighting.FogEnd = 100000
+        for _, v in pairs(Lighting:GetChildren()) do
+            if v:IsA("Atmosphere") or v:IsA("PostEffect") then
+                v:Destroy()
             end
-    
-            highlightZombies() -- This will remove existing ESP elements
-            Rayfield:Notify({
-                Title = "ESP Disabled",
-                Content = "ESP has been turned off",
-                Duration = 3,
-                Image = 4483362458
-            })
         end
     end
-    
-    -- ESP Button
-    local Button = MainTab:CreateButton({
-       Name = "Toggle ESP",
-       Callback = function()
-          toggleESP()
-       end
-    })
-
-
-
-    local Tab = Window:CreateTab("🏃‍♂️Movement", nil) -- Title, Image
-    
-    local Section = Tab:CreateSection("Movement")
-    
-    local flySpeed = 700
-    local flying = false
-    local runService = game:GetService("RunService")
-    local userInput = game:GetService("UserInputService")
-    local players = game:GetService("Players")
-    local localPlayer = players.LocalPlayer
-    local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
-    local rootPart = character:WaitForChild("HumanoidRootPart")
-    
-    local alignPosition, alignOrientation
-    local attachment
-    
-    local function isTyping()
-        return userInput:GetFocusedTextBox() ~= nil
-    end
-    
-    local function toggleFly()
-        flying = not flying
-    
-        if flying then
-            -- Create attachment
-            attachment = Instance.new("Attachment", rootPart)
-    
-            -- Create AlignPosition for smooth movement
-            alignPosition = Instance.new("AlignPosition")
-            alignPosition.Attachment0 = attachment
-            alignPosition.Mode = Enum.PositionAlignmentMode.OneAttachment
-            alignPosition.MaxForce = math.huge
-            alignPosition.Responsiveness = 15
-            alignPosition.RigidityEnabled = false
-            alignPosition.Parent = rootPart
-    
-            -- Create AlignOrientation for rotation stability
-            alignOrientation = Instance.new("AlignOrientation")
-            alignOrientation.Attachment0 = attachment
-            alignOrientation.Mode = Enum.OrientationAlignmentMode.OneAttachment
-            alignOrientation.MaxTorque = math.huge
-            alignOrientation.Responsiveness = 15
-            alignOrientation.Parent = rootPart
-    
-            -- Fly movement update
-            local connection
-            connection = runService.RenderStepped:Connect(function()
-                if not flying then
-                    connection:Disconnect()
-                    if alignPosition then alignPosition:Destroy() end
-                    if alignOrientation then alignOrientation:Destroy() end
-                    if attachment then attachment:Destroy() end
-                    return
-                end
-    
-                if isTyping() then
-                    alignPosition.Position = rootPart.Position
-                    return
-                end
-    
-                local camera = workspace.CurrentCamera
-                local moveDirection = Vector3.zero
-    
-                if userInput:IsKeyDown(Enum.KeyCode.W) then
-                    moveDirection = moveDirection + camera.CFrame.LookVector
-                end
-                if userInput:IsKeyDown(Enum.KeyCode.S) then
-                    moveDirection = moveDirection - camera.CFrame.LookVector
-                end
-                if userInput:IsKeyDown(Enum.KeyCode.A) then
-                    moveDirection = moveDirection - camera.CFrame.RightVector
-                end
-                if userInput:IsKeyDown(Enum.KeyCode.D) then
-                    moveDirection = moveDirection + camera.CFrame.RightVector
-                end
-                if userInput:IsKeyDown(Enum.KeyCode.E) then
-                    moveDirection = moveDirection + Vector3.new(0, 1, 0) -- Fly up
-                end
-                if userInput:IsKeyDown(Enum.KeyCode.Q) then
-                    moveDirection = moveDirection - Vector3.new(0, 1, 0) -- Fly down
-                end
-    
-                if moveDirection.Magnitude > 0 then
-                    alignPosition.Position = rootPart.Position + moveDirection.Unit * flySpeed * 0.05
-                else
-                    alignPosition.Position = rootPart.Position
-                end
-    
-                alignOrientation.CFrame = CFrame.new(rootPart.Position, rootPart.Position + camera.CFrame.LookVector)
-            end)
-        else
-            if alignPosition then alignPosition:Destroy() end
-            if alignOrientation then alignOrientation:Destroy() end
-            if attachment then attachment:Destroy() end
+    removeFog()
+    Lighting.ChildAdded:Connect(function(child)
+        if child:IsA("Atmosphere") or child:IsA("PostEffect") then
+            child:Destroy()
         end
-    end
-    
-    local Button = Tab:CreateButton({
-       Name = "Toggle Fly",
-       Callback = function()
-          toggleFly()
-       end
-    })
-    
-    
-local RunService = game:GetService("RunService")
+    end)
+    Lighting.Changed:Connect(removeFog)
+    Library:Notify("No Fog Enabled")
+end)
+
+-- Right Group: Movement Controls
+local Movement_Group = Main_Tab:AddRightGroupbox("Movement")
+
+-- Fly System
+local flySpeed = 700
+local flying = false
+local userInput = game:GetService("UserInputService")
 local players = game:GetService("Players")
 local localPlayer = players.LocalPlayer
-local playerModel = localPlayer.Character
+local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
-if not playerModel then
-    warn("Player model not found!")
-    return
+local alignPosition, alignOrientation
+local attachment
+
+local function isTyping()
+    return userInput:GetFocusedTextBox() ~= nil
 end
 
-local humanoid = playerModel:FindFirstChildOfClass("Humanoid")
-if not humanoid then
-    warn("Humanoid not found in player model!")
-    return
+local function toggleFly()
+    flying = not flying
+
+    if flying then
+        -- Create attachment
+        attachment = Instance.new("Attachment", rootPart)
+
+        -- Create AlignPosition for smooth movement
+        alignPosition = Instance.new("AlignPosition")
+        alignPosition.Attachment0 = attachment
+        alignPosition.Mode = Enum.PositionAlignmentMode.OneAttachment
+        alignPosition.MaxForce = math.huge
+        alignPosition.Responsiveness = 15
+        alignPosition.RigidityEnabled = false
+        alignPosition.Parent = rootPart
+
+        -- Create AlignOrientation for rotation stability
+        alignOrientation = Instance.new("AlignOrientation")
+        alignOrientation.Attachment0 = attachment
+        alignOrientation.Mode = Enum.OrientationAlignmentMode.OneAttachment
+        alignOrientation.MaxTorque = math.huge
+        alignOrientation.Responsiveness = 15
+        alignOrientation.Parent = rootPart
+
+        -- Fly movement update
+        local connection
+        connection = runService.RenderStepped:Connect(function()
+            if not flying then
+                connection:Disconnect()
+                if alignPosition then alignPosition:Destroy() end
+                if alignOrientation then alignOrientation:Destroy() end
+                if attachment then attachment:Destroy() end
+                return
+            end
+
+            if isTyping() then
+                alignPosition.Position = rootPart.Position
+                return
+            end
+
+            local camera = workspace.CurrentCamera
+            local moveDirection = Vector3.zero
+
+            if userInput:IsKeyDown(Enum.KeyCode.W) then
+                moveDirection = moveDirection + camera.CFrame.LookVector
+            end
+            if userInput:IsKeyDown(Enum.KeyCode.S) then
+                moveDirection = moveDirection - camera.CFrame.LookVector
+            end
+            if userInput:IsKeyDown(Enum.KeyCode.A) then
+                moveDirection = moveDirection - camera.CFrame.RightVector
+            end
+            if userInput:IsKeyDown(Enum.KeyCode.D) then
+                moveDirection = moveDirection + camera.CFrame.RightVector
+            end
+            if userInput:IsKeyDown(Enum.KeyCode.E) then
+                moveDirection = moveDirection + Vector3.new(0, 1, 0) -- Fly up
+            end
+            if userInput:IsKeyDown(Enum.KeyCode.Q) then
+                moveDirection = moveDirection - Vector3.new(0, 1, 0) -- Fly down
+            end
+
+            if moveDirection.Magnitude > 0 then
+                alignPosition.Position = rootPart.Position + moveDirection.Unit * flySpeed * 0.05
+            else
+                alignPosition.Position = rootPart.Position
+            end
+
+            alignOrientation.CFrame = CFrame.new(rootPart.Position, rootPart.Position + camera.CFrame.LookVector)
+        end)
+    else
+        if alignPosition then alignPosition:Destroy() end
+        if alignOrientation then alignOrientation:Destroy() end
+        if attachment then attachment:Destroy() end
+    end
 end
 
+Movement_Group:AddToggle("Fly_Enabled", {
+    Text = "Fly",
+    Default = false,
+    Callback = function(state)
+        toggleFly()
+    end
+})
+
+-- NoClip System
 local noclipEnabled = false
 local heartbeatConnection
+local humanoid = character:FindFirstChildOfClass("Humanoid")
 
 local function setCollisions(model, state)
     for _, obj in pairs(model:GetDescendants()) do
@@ -276,15 +249,15 @@ end
 
 local function preventFalling()
     if noclipEnabled and humanoid then
-        humanoid:SetAttribute("isFalling", false) 
-        humanoid:ChangeState(Enum.HumanoidStateType.Physics) 
+        humanoid:SetAttribute("isFalling", false) -- Constantly set to false
+        humanoid:ChangeState(Enum.HumanoidStateType.Physics)
     end
 end
 
 local function onHeartbeat()
     if noclipEnabled then
-        setCollisions(playerModel, false)
-        preventFalling()
+        setCollisions(character, false)
+        preventFalling() -- Keep it looping while active
     end
 end
 
@@ -292,242 +265,36 @@ local function toggleNoclip()
     noclipEnabled = not noclipEnabled
 
     if noclipEnabled then
-        setCollisions(playerModel, false) -- Disable collisions
-        heartbeatConnection = RunService.Heartbeat:Connect(onHeartbeat)
-        print("Noclip Enabled")
+        setCollisions(character, false) -- Disable collisions
+        heartbeatConnection = runService.Heartbeat:Connect(onHeartbeat)
+        Library:Notify("NoClip Enabled")
     else
         if heartbeatConnection then
             heartbeatConnection:Disconnect()
             heartbeatConnection = nil
         end
-        setCollisions(playerModel, true) -- Re-enable collisions
+        setCollisions(character, true) -- Re-enable collisions
         if humanoid then
-            humanoid:SetAttribute("isFalling", true)
+            humanoid:SetAttribute("isFalling", true) -- Reset when NoClip is off
             humanoid:ChangeState(Enum.HumanoidStateType.Freefall) -- Allow falling again
         end
-        print("Noclip Disabled")
+        Library:Notify("NoClip Disabled")
     end
 end
 
-local Button = Tab:CreateButton({
-   Name = "Toggle Noclip",
-   Callback = function()
-      toggleNoclip()
-   end
-})
-    
-    
-    local Workspace = game:GetService("Workspace")
-    local Camera = Workspace.CurrentCamera
-    local RunService = game:GetService("RunService")
-    local UserInputService = game:GetService("UserInputService")
-    local TweenService = game:GetService("TweenService")
-    
-    local Holding = false
-    local AimbotEnabled = false
-    local RenderSteppedConnection = nil
-    
-    _G.Sensitivity = 0
-    _G.CircleSides = 104
-    _G.CircleColor = Color3.fromRGB(255, 255, 255)
-    _G.CircleTransparency = 0.7
-    _G.CircleRadius = 650
-    _G.CircleFilled = false
-    _G.CircleVisible = true
-    _G.CircleThickness = 0
-    
-    local FOVCircle = Drawing.new("Circle")
-    FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-    FOVCircle.Radius = _G.CircleRadius
-    FOVCircle.Filled = _G.CircleFilled
-    FOVCircle.Color = _G.CircleColor
-    FOVCircle.Visible = false -- Start with it hidden
-    FOVCircle.Transparency = _G.CircleTransparency
-    FOVCircle.NumSides = _G.CircleSides
-    FOVCircle.Thickness = _G.CircleThickness
-    
-    local function GetClosestZombie()
-        local MaximumDistance = _G.CircleRadius
-        local Target = nil
-    
-        for _, zombie in pairs(Workspace.Zombies:GetChildren()) do
-            if zombie:FindFirstChild("Head") and zombie:FindFirstChild("Humanoid") and zombie.Humanoid.Health > 0 then
-                local ScreenPoint = Camera:WorldToScreenPoint(zombie.Head.Position)
-                local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
-    
-                if VectorDistance < MaximumDistance then
-                    Target = zombie
-                    MaximumDistance = VectorDistance
-                end
-            end
-        end
-    
-        return Target
+Movement_Group:AddToggle("NoClip_Enabled", {
+    Text = "No Clip",
+    Default = false,
+    Callback = function(state)
+        toggleNoclip()
     end
-    
-    local function ToggleAimbot()
-        AimbotEnabled = not AimbotEnabled
-    
-        if AimbotEnabled then
-            print("Aimbot Enabled")
-    
-            local function OnInputBegan(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton2 then
-                    Holding = true
-                end
-            end
-    
-            local function OnInputEnded(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton2 then
-                    Holding = false
-                end
-            end
-    
-            UserInputService.InputBegan:Connect(OnInputBegan)
-            UserInputService.InputEnded:Connect(OnInputEnded)
-    
-            -- Start aimbot logic
-            RenderSteppedConnection = RunService.RenderStepped:Connect(function()
-                FOVCircle.Position = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
-                FOVCircle.Visible = true -- Show the circle when aimbot is enabled
-    
-                if Holding then
-                    local Target = GetClosestZombie()
-                    if Target then
-                        TweenService:Create(
-                            Camera, 
-                            TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), 
-                            {CFrame = CFrame.new(Camera.CFrame.Position, Target.Head.Position)}
-                        ):Play()
-                    end
-                end
-            end)
-        else
-        
-            print("Aimbot Disabled")
-    
-            -- Disconnect the RenderStepped event to stop aimbot behavior
-            if RenderSteppedConnection then
-                RenderSteppedConnection:Disconnect()
-                RenderSteppedConnection = nil
-            end
-    
-            -- Hide the FOV circle when disabled
-            FOVCircle.Visible = false
-        end
-    end
-    
-    local Tab = Window:CreateTab("🎯Aimbot", nil) -- Title, Image
-    local Section = Tab:CreateSection("Aimbot")
-    
-    local Button = Tab:CreateButton({
-        Name = "Toggle Aimbot",
-        Callback = function()
-            ToggleAimbot()
-        end
-    })
-
-
-local Tab = Window:CreateTab("🌍World", nil) -- Title, Image
-local Section = Tab:CreateSection("World")
-
-local Button = Tab:CreateButton({
-   Name = "FullBright",
-   Callback = function()
-local Lighting = game:GetService("Lighting")
-
-local function enableFullbright()
-    Lighting.Brightness = 5
-    Lighting.GlobalShadows = false
-    Lighting.Ambient = Color3.new(1, 1, 1) -- Full white ambient
-    Lighting.OutdoorAmbient = Color3.new(1, 1, 1) -- Makes outdoor areas bright too
-end
-
-enableFullbright()
-
--- Optional: Reapply settings if Lighting changes
-Lighting.Changed:Connect(enableFullbright)
-
-   end,
 })
-
-local Button = Tab:CreateButton({
-   Name = "NoFog",
-   Callback = function()
-local Lighting = game:GetService("Lighting")
-
-local function removeFog()
-    -- Disable Fog
-    Lighting.FogStart = 0
-    Lighting.FogEnd = 100000 -- Large number to remove fog
-
-    -- Remove Atmosphere
-    for _, v in pairs(Lighting:GetChildren()) do
-        if v:IsA("Atmosphere") or v:IsA("PostEffect") then
-            v:Destroy()
-        end
-    end
-end
-
-removeFog()
-
--- Keep checking in case fog is re-added
-Lighting.ChildAdded:Connect(function(child)
-    if child:IsA("Atmosphere") or child:IsA("PostEffect") then
-        child:Destroy()
-    end
-end)
-
-Lighting.Changed:Connect(removeFog)
-
-   end,
-})
-
-local Button = Tab:CreateButton({
-   Name = "BuyAmmo",
-   Callback = function()
-local tween_s = game:GetService("TweenService")
-local replicatedStorage = game:GetService("ReplicatedStorage")
-local lp = game.Players.LocalPlayer
-local character = lp.Character or lp.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
-local teleportLocation = workspace:WaitForChild("MapFolder"):WaitForChild("Ammo Boxes"):WaitForChild("Default"):WaitForChild("Origin")
-local remoteEvent = replicatedStorage:WaitForChild("Remotes"):WaitForChild("RemoteEvent")
-
-local tweeninfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear) -- Fast teleport time
-
-function tweenTeleport(destination)
-    local cf = CFrame.new(destination)
-    local tween = tween_s:Create(humanoidRootPart, tweeninfo, {CFrame = cf})
-    tween:Play()
-    tween.Completed:Wait() -- Wait for teleport to finish
-end
-
--- Save the player's original position
-local originalPosition = humanoidRootPart.Position
-
--- Tween teleport to ammo box
-tweenTeleport(teleportLocation.Position)
-
--- Fire the remote event
-task.wait(0.1)
-local args = {
-    [1] = "Buy Ammo",
-    [2] = workspace:WaitForChild("MapFolder"):WaitForChild("Ammo Boxes"):WaitForChild("Default")
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RemoteEvent"):FireServer(unpack(args))
-
--- Tween teleport back to the original position
-tweenTeleport(originalPosition)
-
-   end,
-})
+-- Add Malicious Group under ESP Controls
+local Malicious_Group = Main_Tab:AddLeftGroupbox("Malicious")
 
 local player = game:GetService("Players").LocalPlayer
-local zombiesFolder = workspace:FindFirstChild("Zombies") -- Change if needed
-local loop = false -- Controls whether the loop is running
+local zombiesFolder = workspace:FindFirstChild("Zombies") -- Adjust if needed
+local loop = false -- Controls whether the loop runs
 
 local function teleportZombies()
     if not zombiesFolder then return end
@@ -546,20 +313,192 @@ local function teleportZombies()
     end
 end
 
-local Toggle = Tab:CreateToggle({
-    Name = "Teleport Zombies",
-    CurrentValue = false,
-    Flag = "Toggle1",
-    Callback = function(Value)
-        loop = Value -- Set loop state based on toggle
+Malicious_Group:AddToggle("Teleport_Zombies", {
+    Text = "Teleport Zombies",
+    Default = false,
+    Callback = function(state)
+        loop = state -- Enable or disable loop
 
         if loop then
             task.spawn(function()
                 while loop do
                     teleportZombies()
-                    task.wait(0.1)
+                    task.wait(0.1) -- Adjust for faster/slower teleportation
                 end
             end)
         end
-    end,
+    end
 })
+
+-- Add "Buy Ammo" button under "Teleport Zombies"
+Malicious_Group:AddButton("Buy Ammo", function()
+    local tween_s = game:GetService("TweenService")
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    local lp = game.Players.LocalPlayer
+    local character = lp.Character or lp.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    local teleportLocation = workspace:WaitForChild("MapFolder"):WaitForChild("Ammo Boxes"):WaitForChild("Default"):WaitForChild("Origin")
+    local remoteEvent = replicatedStorage:WaitForChild("Remotes"):WaitForChild("RemoteEvent")
+
+    local tweeninfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear) -- Fast teleport
+
+    local function tweenTeleport(destination)
+        local cf = CFrame.new(destination)
+        local tween = tween_s:Create(humanoidRootPart, tweeninfo, {CFrame = cf})
+        tween:Play()
+        tween.Completed:Wait() -- Wait for teleport to finish
+    end
+
+    -- Save the player's original position
+    local originalPosition = humanoidRootPart.Position
+
+    -- Teleport to ammo box
+    tweenTeleport(teleportLocation.Position)
+
+    -- Fire the remote event to buy ammo
+    task.wait(0.1)
+    local args = {
+        [1] = "Buy Ammo",
+        [2] = workspace:WaitForChild("MapFolder"):WaitForChild("Ammo Boxes"):WaitForChild("Default")
+    }
+    remoteEvent:FireServer(unpack(args))
+
+    -- Teleport back to the original position
+    tweenTeleport(originalPosition)
+end)
+
+-- Aim Assistance Group under Movement
+local AimAssistance_Group = Main_Tab:AddRightGroupbox("Aim Assistance")
+
+-- Provided Aimbot Code (do not change anything)
+local Workspace = game:GetService("Workspace")
+local Camera = Workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local Holding = false
+local AimbotEnabled = false
+local RenderSteppedConnection = nil
+
+_G.Sensitivity = 0
+_G.CircleSides = 104
+_G.CircleColor = Color3.fromRGB(255, 255, 255)
+_G.CircleTransparency = 0.7
+_G.CircleRadius = 650
+_G.CircleFilled = false
+_G.CircleVisible = true
+_G.CircleThickness = 0
+
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+FOVCircle.Radius = _G.CircleRadius
+FOVCircle.Filled = _G.CircleFilled
+FOVCircle.Color = _G.CircleColor
+FOVCircle.Visible = false -- Start with it hidden
+FOVCircle.Transparency = _G.CircleTransparency
+FOVCircle.NumSides = _G.CircleSides
+FOVCircle.Thickness = _G.CircleThickness
+
+local function GetClosestZombie()
+    local MaximumDistance = _G.CircleRadius
+    local Target = nil
+
+    for _, zombie in pairs(Workspace.Zombies:GetChildren()) do
+        if zombie:FindFirstChild("Head") and zombie:FindFirstChild("Humanoid") and zombie.Humanoid.Health > 0 then
+            local ScreenPoint = Camera:WorldToScreenPoint(zombie.Head.Position)
+            local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+
+            if VectorDistance < MaximumDistance then
+                Target = zombie
+                MaximumDistance = VectorDistance
+            end
+        end
+    end
+
+    return Target
+end
+
+local function ToggleAimbot()
+    AimbotEnabled = not AimbotEnabled
+
+    if AimbotEnabled then
+        print("Aimbot Enabled")
+
+        local function OnInputBegan(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                Holding = true
+            end
+        end
+
+        local function OnInputEnded(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                Holding = false
+            end
+        end
+
+        UserInputService.InputBegan:Connect(OnInputBegan)
+        UserInputService.InputEnded:Connect(OnInputEnded)
+
+        -- Start aimbot logic
+        RenderSteppedConnection = RunService.RenderStepped:Connect(function()
+            FOVCircle.Position = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+            FOVCircle.Visible = true -- Show the circle when aimbot is enabled
+
+            if Holding then
+                local Target = GetClosestZombie()
+                if Target then
+                    TweenService:Create(
+                        Camera, 
+                        TweenInfo.new(_G.Sensitivity, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), 
+                        {CFrame = CFrame.new(Camera.CFrame.Position, Target.Head.Position)}
+                    ):Play()
+                end
+            end
+        end)
+    else
+        print("Aimbot Disabled")
+
+        -- Disconnect the RenderStepped event to stop aimbot behavior
+        if RenderSteppedConnection then
+            RenderSteppedConnection:Disconnect()
+            RenderSteppedConnection = nil
+        end
+
+        -- Hide the FOV circle when disabled
+        FOVCircle.Visible = false
+    end
+end
+
+-- Add the Aimbot toggle button inside the Aim Assistance group
+AimAssistance_Group:AddToggle("Aimbot", {
+    Text = "Aimbot",
+    Default = false,
+    Callback = function(state)
+        ToggleAimbot()
+    end
+})
+
+
+
+-- Config Tab
+local Config_Tab = Window:AddTab("Config")
+local Config_Section = Config_Tab:AddLeftGroupbox("Configuration")
+
+Config_Section:AddInput("ConfigName", {Text = "Config Name", Default = "MyConfig"})
+Config_Section:AddButton("Create Config", function()
+    Library:Notify("Create Config button pressed")
+end)
+Config_Section:AddButton("Save Config", function()
+    Library:Notify("Save Config button pressed")
+end)
+Config_Section:AddButton("Load Config", function()
+    Library:Notify("Load Config button pressed")
+end)
+
+Config_Section:AddButton("Reset UI", function()
+    Library:Unload()
+end)
+
+Library:Notify("GUI Loaded Successfully!")
