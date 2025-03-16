@@ -207,6 +207,9 @@ local function toggleFly()
             if userInput:IsKeyDown(Enum.KeyCode.E) then
                 moveDirection = moveDirection + Vector3.new(0, 1, 0) -- Fly up
             end
+            if userInput:IsKeyDown(Enum.KeyCode.Space) then
+            moveDirection = moveDirection + Vector3.new(0, 1, 0) -- Fly up
+            end
             if userInput:IsKeyDown(Enum.KeyCode.Q) then
                 moveDirection = moveDirection - Vector3.new(0, 1, 0) -- Fly down
             end
